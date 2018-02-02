@@ -2058,8 +2058,10 @@ class MachineCom(object):
 	def _filterXonXoffCharacters(self, ret):
 		if self._xonxoff_stopChar in ret:
 			self._pause_transmission = True
+			self._log("pause transmission")
 			ret = ret.translate(None, self._xonxoff_stopChar)
 		if self._xonxoff_resumeChar in ret:
+			self._log("resume transmission")
 			self._pause_transmission = False
 			self._continue_sending()
 			self._clear_to_send.set()
