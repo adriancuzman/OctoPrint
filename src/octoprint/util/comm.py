@@ -2469,6 +2469,8 @@ class MachineCom(object):
 					if self.isSendingFileToSDWithSoftwareFlow() and not self._pause_transmission:
 							self._continue_sending()
 							self._clear_to_send.set()
+					if self._pause_transmission:
+						self._log("recived pause")
 				finally:
 					# no matter _how_ we exit this block, we signal that we
 					# are done processing the last fetched queue entry
@@ -2476,6 +2478,8 @@ class MachineCom(object):
 
 				# now we just wait for the next clear and then start again
 				self._clear_to_send.wait()
+				if self._pause_transmission:
+					self._log("recived pause but still sending...")
 			except:
 				self._logger.exception("Caught an exception in the send loop")
 		self._log("Closing down send loop")
