@@ -2073,7 +2073,27 @@ class MachineCom(object):
 			return None
 
 		try:
-			ret = self._serial.readline()
+			if self.isSendingFileToSDWithSoftwareFlow() and self._use_xonxoff_workaround:
+				newLine = False
+				ret = ""
+				while not newLine:
+					b = self._serial.read(1)
+					if (ord(b[0]) == 19):
+						self._pause_transmission = True
+						self._log("pause tr")
+					else:
+						if (ord(b[0]) == 17):
+							self._log("resume tr")
+							self._pause_transmission = False
+							self._continue_sending()
+							self._clear_to_send.set()
+						else:
+							if (b[0] == '\n'):
+								newLine = True
+							else:
+								ret += chr(ord(b[0]))
+			else:
+				ret = self._serial.readline()
 		except Exception as ex:
 			if not self._connection_closing:
 				self._logger.exception("Unexpected error while reading from serial port")
