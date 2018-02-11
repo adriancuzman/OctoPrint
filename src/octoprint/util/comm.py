@@ -1959,6 +1959,7 @@ class MachineCom(object):
 				serial_obj = serial.Serial(str(port), baudrate, timeout=read_timeout, writeTimeout=10000, xonxoff=software_xonxoff, parity=serial.PARITY_ODD)
 			serial_obj.close()
 			serial_obj.parity = serial.PARITY_NONE
+			serial_obj.xonxoff = True
 			serial_obj.open()
 
 			return serial_obj
