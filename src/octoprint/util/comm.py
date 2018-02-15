@@ -2104,8 +2104,8 @@ class MachineCom(object):
 				if self.isSendingFileToSDWithSoftwareFlow() and self._use_xonxoff_workaround:
 					ret = self._filterXonXoffCharacters(ret)
 
-				if not self.isSendingFileToSDWithSoftwareFlow():
-					self._log("Recv: " + sanitize_ascii(ret))
+				self._log("Recv: " + sanitize_ascii(ret))
+				self._logger.error("Recv: " + sanitize_ascii(ret))
 			except ValueError as e:
 				self._log("WARN: While reading last line: %s" % e)
 				self._log("Recv: " + repr(ret))
@@ -2561,8 +2561,8 @@ class MachineCom(object):
 		if self._serial is None:
 			return
 
-		if not self.isSendingFileToSDWithSoftwareFlow():
-			self._log("Send: " + str(cmd))
+		self._log("Send: " + str(cmd))
+		self._logger.error("Send: " + str(cmd))
 
 		cmd += "\n"
 		written = 0
