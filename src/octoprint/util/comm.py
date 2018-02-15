@@ -2391,7 +2391,7 @@ class MachineCom(object):
 					if linenumber is not None:
 						# line number predetermined - this only happens for resends, so we'll use the number and
 						# send directly without any processing (since that already took place on the first sending!)
-						self._do_send_without_checksum(command, linenumber)
+						self._do_send_with_checksum(command, linenumber)
 
 					else:
 						if not processed:
