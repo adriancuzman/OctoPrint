@@ -386,6 +386,7 @@ class MachineCom(object):
 		self._sdRelativePath = settings().getBoolean(["feature", "sdRelativePath"])
 		self._blockWhileDwelling = settings().getBoolean(["feature", "blockWhileDwelling"])
 		self._currentLine = 1
+		self._okCounter = 1
 		self._line_mutex = threading.RLock()
 		self._resendDelta = None
 
@@ -1641,6 +1642,7 @@ class MachineCom(object):
 		self._log("Connection closed, closing down monitor")
 
 	def _handle_ok(self):
+		self._okCounter = self._okCounter + 1;
 		can_send = not self.isSendingFileToSDWithSoftwareFlow()
 		if can_send:
 			self._clear_to_send.set()
@@ -2465,8 +2467,9 @@ class MachineCom(object):
 						if self._pause_transmission:
 							self._clear_to_send.clear(True)
 						else:
-							self._continue_sending()
-							self._clear_to_send.set()
+							if (self._currentLine - self._okCounter) < 5:
+								self._continue_sending()
+								self._clear_to_send.set()
 				finally:
 					# no matter _how_ we exit this block, we signal that we
 					# are done processing the last fetched queue entry
@@ -2776,6 +2779,7 @@ class MachineCom(object):
 
 			# send M110 command with new line number
 			self._currentLine = newLineNumber
+			self._okCounter = newLineNumber
 
 			# after a reset of the line number we have no way to determine what line exactly the printer now wants
 			self._lastLines.clear()
