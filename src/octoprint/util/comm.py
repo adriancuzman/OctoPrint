@@ -1240,6 +1240,9 @@ class MachineCom(object):
 				line = self._readline()
 				if line is None:
 					break
+				if self.isSendingFileToSDWithSoftwareFlow() and line.startswith("ok"):
+					self._okCounter = self._okCounter + 1
+					break
 				if line.strip() is not "":
 					self._consecutive_timeouts = 0
 					self._timeout = get_new_timeout("communication", self._timeout_intervals)
@@ -2467,7 +2470,7 @@ class MachineCom(object):
 						if self._pause_transmission:
 							self._clear_to_send.clear(True)
 						else:
-							if (self._currentLine - self._okCounter) < 5:
+							if (self._currentLine - self._okCounter) < 100:
 								self._continue_sending()
 								self._clear_to_send.set()
 				finally:
