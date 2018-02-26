@@ -2141,6 +2141,9 @@ class MachineCom(object):
 	def _handleResendRequest(self, line):
 		try:
 			lineToResend = parse_resend_line(line)
+			if lineToResend > self._currentLine:
+				return False
+
 			if lineToResend is None:
 				return False
 
