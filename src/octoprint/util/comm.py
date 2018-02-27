@@ -2089,7 +2089,7 @@ class MachineCom(object):
 					ret = self._filterXonXoffCharacters(ret)
 
 				self._log("Recv: " + sanitize_ascii(ret))
-				self._logger("Recv: " + sanitize_ascii(ret))
+				self._logger.error("Recv: " + sanitize_ascii(ret))
 			except ValueError as e:
 				self._log("WARN: While reading last line: %s" % e)
 				self._log("Recv: " + repr(ret))
