@@ -2153,8 +2153,8 @@ class MachineCom(object):
 				# an active (prior) resend request.
 				#
 				# We will ignore this resend request and just continue normally.
-				self._logger.info("Ignoring resend request for line %d == current line, we haven't sent that yet so "
-				                   "the printer got N-1 twice from us, probably due to a timeout" % lineToResend)
+				#self._logger.info("Ignoring resend request for line %d == current line, we haven't sent that yet so "
+				#                   "the printer got N-1 twice from us, probably due to a timeout" % lineToResend)
 				return False
 
 			lastCommError = self._lastCommError
@@ -2166,8 +2166,8 @@ class MachineCom(object):
 					and ("line number" in lastCommError.lower() or "expected line" in lastCommError.lower()) \
 					and lineToResend == self._lastResendNumber \
 					and self._resendDelta is not None and self._currentResendCount < self._resendDelta:
-				self._logger.info("Ignoring resend request for line %d, that still originates from lines we sent "
-				                   "before we got the first resend request" % lineToResend)
+				#self._logger.info("Ignoring resend request for line %d, that still originates from lines we sent "
+				#                   "before we got the first resend request" % lineToResend)
 				self._currentResendCount += 1
 				return True
 
@@ -2175,8 +2175,8 @@ class MachineCom(object):
 			# need to do this now. If the same line number has been requested we
 			# already saw and resent, we'll ignore it up to <counter> times.
 			if self._resendSwallowRepetitions and lineToResend == self._lastResendNumber and self._resendSwallowRepetitionsCounter > 0:
-				self._logger.info("Ignoring resend request for line %d, that is probably a repetition sent by the "
-				                   "firmware to ensure it arrives, not a real request" % lineToResend)
+				#self._logger.info("Ignoring resend request for line %d, that is probably a repetition sent by the "
+				#                   "firmware to ensure it arrives, not a real request" % lineToResend)
 				self._resendSwallowRepetitionsCounter -= 1
 				return True
 
