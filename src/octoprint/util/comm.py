@@ -2173,7 +2173,8 @@ class MachineCom(object):
 				self._logger.info("Ignoring resend request for line %d, that still originates from lines we sent "
 				                   "before we got the first resend request" % lineToResend)
 				self._currentResendCount += 1
-				return True
+				if self._currentResendCount < 50:
+					return True
 
 			# If we ignore resend repetitions (Repetier firmware...), check if we
 			# need to do this now. If the same line number has been requested we
