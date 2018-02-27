@@ -2089,6 +2089,7 @@ class MachineCom(object):
 					ret = self._filterXonXoffCharacters(ret)
 
 				self._log("Recv: " + sanitize_ascii(ret))
+				self._logger("Recv: " + sanitize_ascii(ret))
 			except ValueError as e:
 				self._log("WARN: While reading last line: %s" % e)
 				self._log("Recv: " + repr(ret))
@@ -2545,6 +2546,7 @@ class MachineCom(object):
 			return
 
 		self._log("Send: " + str(cmd))
+		self._logger.error("Send: " + str(cmd))
 
 		cmd += "\n"
 		written = 0
