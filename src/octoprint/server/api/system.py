@@ -7,7 +7,7 @@ __copyright__ = "Copyright (C) 2015 The OctoPrint Project - Released under terms
 import collections
 import logging
 import sarge
-import threading
+import multiprocessing
 
 from flask import request, make_response, jsonify, url_for
 from flask.ext.babel import gettext
@@ -116,7 +116,7 @@ def executeSystemCommand(source, command):
 					raise CommandFailed(error)
 
 		if do_async:
-			thread = threading.Thread(target=execute)
+			thread = multiprocessing.Process(target=execute)
 			thread.daemon = True
 			thread.start()
 

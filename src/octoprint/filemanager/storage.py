@@ -481,8 +481,8 @@ class LocalFileStorage(StorageInterface):
 		if not os.path.exists(self.basefolder) or not os.path.isdir(self.basefolder):
 			raise StorageError("{basefolder} is not a valid directory".format(**locals()), code=StorageError.INVALID_DIRECTORY)
 
-		import threading
-		self._metadata_lock_mutex = threading.RLock()
+		import multiprocessing
+		self._metadata_lock_mutex = multiprocessing.RLock()
 		self._metadata_locks = dict()
 
 		self._metadata_cache = pylru.lrucache(10)
@@ -695,7 +695,7 @@ class LocalFileStorage(StorageInterface):
 			display = destination_data["display"]
 		else:
 			display = None
-		
+
 		destination_meta = self._get_metadata_entry(destination_data["path"], destination_data["name"],
 		                                            default=dict())
 		if display:
@@ -712,14 +712,14 @@ class LocalFileStorage(StorageInterface):
 			shutil.copytree(source_data["fullpath"], destination_data["fullpath"])
 		except Exception as e:
 			raise StorageError("Could not copy %s in %s to %s in %s" % (source_data["name"], source_data["path"], destination_data["name"], destination_data["path"]), cause=e)
-		
+
 		self._set_display_metadata(destination_data, source_data=source_data)
 
 		return self.path_in_storage(destination_data["fullpath"])
 
 	def move_folder(self, source, destination):
 		source_data, destination_data = self._get_source_destination_data(source, destination)
-		
+
 		# only a display rename? Update that and bail early
 		if source_data["fullpath"] == destination_data["fullpath"]:
 			self._set_display_metadata(destination_data)
@@ -839,7 +839,7 @@ class LocalFileStorage(StorageInterface):
 		                          destination_data["path"], destination_data["name"],
 		                          delete_source=True)
 		self._set_display_metadata(destination_data, source_data=source_data)
-		
+
 		return self.path_in_storage(destination_data["fullpath"])
 
 	def has_analysis(self, path):
@@ -988,7 +988,7 @@ class LocalFileStorage(StorageInterface):
 		absolute path including leading ``basefolder`` path.
 		"""
 		path = to_unicode(path)
-		
+
 		if len(path):
 			if path[0] == u"/":
 				path = path[1:]
@@ -1548,8 +1548,8 @@ class LocalFileStorage(StorageInterface):
 	def _get_metadata_lock(self, path):
 		with self._metadata_lock_mutex:
 			if path not in self._metadata_locks:
-				import threading
-				self._metadata_locks[path] = (0, threading.RLock())
+				import multiprocessing
+				self._metadata_locks[path] = (0, multiprocessing.RLock())
 
 			counter, lock = self._metadata_locks[path]
 			counter += 1

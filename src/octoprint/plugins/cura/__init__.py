@@ -37,10 +37,10 @@ class CuraPlugin(octoprint.plugin.SlicerPlugin,
 		self._cura_logger = logging.getLogger("octoprint.plugins.cura.engine")
 
 		# setup job tracking across threads
-		import threading
+		import multiprocessing
 		self._slicing_commands = dict()
 		self._cancelled_jobs = []
-		self._job_mutex = threading.Lock()
+		self._job_mutex = multiprocessing.Lock()
 
 	def _is_engine_configured(self, cura_engine=None):
 		if cura_engine is None:

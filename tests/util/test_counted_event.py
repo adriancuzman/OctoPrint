@@ -7,7 +7,7 @@ __copyright__ = "Copyright (C) 2015 The OctoPrint Project - Released under terms
 
 import unittest
 import time
-import threading
+import multiprocessing
 
 from octoprint.util import CountedEvent
 
@@ -121,7 +121,7 @@ class CountedEventTest(unittest.TestCase):
 			time.sleep(1)
 			event.set()
 
-		thread = threading.Thread(target=set_event)
+		thread = multiprocessing.Process(target=set_event)
 		thread.daemon = True
 		thread.start()
 

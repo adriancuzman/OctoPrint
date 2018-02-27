@@ -261,14 +261,14 @@ class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
 		if not pybonjour:
 			return None
 
-		import threading
+		import multiprocessing
 		import select
 
 		if not block and not callback:
 			raise ValueError("Non-blocking mode but no callback given")
 
 		result = []
-		result_available = threading.Event()
+		result_available = multiprocessing.Event()
 		result_available.clear()
 
 		resolved = []
@@ -336,7 +336,7 @@ class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
 				callback(result)
 			result_available.set()
 
-		browse_thread = threading.Thread(target=browse)
+		browse_thread = multiprocessing.Process(target=browse)
 		browse_thread.daemon = True
 		browse_thread.start()
 
@@ -377,7 +377,7 @@ class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
 		         supplied to the callback instead)
 		"""
 
-		import threading
+		import multiprocessing
 
 		import httplib
 		import io
@@ -391,7 +391,7 @@ class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
 				self.begin()
 
 		result = []
-		result_available = threading.Event()
+		result_available = multiprocessing.Event()
 		result_available.clear()
 
 		def browse():
@@ -436,7 +436,7 @@ class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
 				callback(result)
 			result_available.set()
 
-		browse_thread = threading.Thread(target=browse)
+		browse_thread = multiprocessing.Process(target=browse)
 		browse_thread.daemon = True
 		browse_thread.start()
 
@@ -524,11 +524,11 @@ class DiscoveryPlugin(octoprint.plugin.StartupPlugin,
 		Registers the OctoPrint instance as basic service with a presentation URL pointing to the web interface
 		"""
 
-		import threading
+		import multiprocessing
 
 		self._ssdp_monitor_active = True
 
-		self._ssdp_monitor_thread = threading.Thread(target=self._ssdp_monitor, kwargs=dict(timeout=self._ssdp_notify_timeout))
+		self._ssdp_monitor_thread = multiprocessing.Process(target=self._ssdp_monitor, kwargs=dict(timeout=self._ssdp_notify_timeout))
 		self._ssdp_monitor_thread.daemon = True
 		self._ssdp_monitor_thread.start()
 

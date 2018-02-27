@@ -9,7 +9,7 @@ import logging
 import os
 import platform
 import sys
-import threading
+import multiprocessing
 import yaml
 
 import psutil
@@ -23,7 +23,7 @@ class EnvironmentDetector(object):
 		self._plugin_manager = plugin_manager
 
 		self._cache = None
-		self._cache_lock = threading.RLock()
+		self._cache_lock = multiprocessing.RLock()
 
 		self._environment_plugins = self._plugin_manager.get_implementations(EnvironmentDetectionPlugin)
 

@@ -666,8 +666,8 @@ class Server(object):
 				if settings().getBoolean(["devel", "cache", "preemptive"]):
 					self._execute_preemptive_flask_caching(preemptiveCache)
 
-			import threading
-			threading.Thread(target=work).start()
+			import multiprocessing
+			multiprocessing.Process(target=work).start()
 		ioloop.add_callback(on_after_startup)
 
 		# prepare our shutdown function
@@ -973,8 +973,8 @@ class Server(object):
 						logger.exception("Error while trying to preemptively cache {} for {!r}".format(route, kwargs))
 
 		# asynchronous caching
-		import threading
-		cache_thread = threading.Thread(target=execute_caching, name="Preemptive Cache Worker")
+		import multiprocessing
+		cache_thread = multiprocessing.Process(target=execute_caching, name="Preemptive Cache Worker")
 		cache_thread.daemon = True
 		cache_thread.start()
 
@@ -1391,7 +1391,7 @@ class Server(object):
 	def _start_intermediary_server(self):
 		import BaseHTTPServer
 		import SimpleHTTPServer
-		import threading
+		import multiprocessing
 
 		host = self._host
 		port = self._port
@@ -1482,7 +1482,7 @@ class Server(object):
 			except:
 				self._logger.exception("Error in intermediary server")
 
-		thread = threading.Thread(target=serve)
+		thread = multiprocessing.Process(target=serve)
 		thread.daemon = True
 		thread.start()
 

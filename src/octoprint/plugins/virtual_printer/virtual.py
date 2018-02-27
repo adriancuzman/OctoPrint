@@ -7,7 +7,7 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 import time
 import os
 import re
-import threading
+import multiprocessing
 import math
 try:
 	import queue
@@ -98,7 +98,7 @@ class VirtualPrinter(object):
 		self._virtualSd = settings().getBaseFolder("virtualSd")
 		self._sdCardReady = True
 		self._sdPrinter = None
-		self._sdPrintingSemaphore = threading.Event()
+		self._sdPrintingSemaphore = multiprocessing.Event()
 		self._selectedSdFile = None
 		self._selectedSdFileSize = None
 		self._selectedSdFilePos = None
@@ -131,7 +131,7 @@ class VirtualPrinter(object):
 		self.currentLine = 0
 		self.lastN = 0
 
-		self._incoming_lock = threading.RLock()
+		self._incoming_lock = multiprocessing.RLock()
 
 		self._debug_awol = False
 		self._debug_sleep = None
@@ -151,10 +151,10 @@ class VirtualPrinter(object):
 		self._triggerResendWithMissingLinenoAt110 = True
 		self._triggerResendWithChecksumMismatchAt115 = True
 
-		readThread = threading.Thread(target=self._processIncoming, name="octoprint.plugins.virtual_printer.wait_thread")
+		readThread = multiprocessing.Process(target=self._processIncoming, name="octoprint.plugins.virtual_printer.wait_thread")
 		readThread.start()
 
-		bufferThread = threading.Thread(target=self._processBuffer, name="octoprint.plugins.virtual_printer.buffer_thread")
+		bufferThread = multiprocessing.Process(target=self._processBuffer, name="octoprint.plugins.virtual_printer.buffer_thread")
 		bufferThread.start()
 
 	def __str__(self):
@@ -726,7 +726,7 @@ class VirtualPrinter(object):
 	def _startSdPrint(self):
 		if self._selectedSdFile is not None:
 			if self._sdPrinter is None:
-				self._sdPrinter = threading.Thread(target=self._sdPrintingWorker)
+				self._sdPrinter = multiprocessing.Process(target=self._sdPrintingWorker)
 				self._sdPrinter.start()
 		self._sdPrintingSemaphore.set()
 

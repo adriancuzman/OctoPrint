@@ -12,7 +12,7 @@ try:
 	import queue
 except ImportError:
 	import Queue as queue
-import threading
+import multiprocessing
 import collections
 
 from octoprint.settings import settings
@@ -140,7 +140,7 @@ class EventManager(object):
 		self._queue = queue.Queue()
 		self._held_back = queue.Queue()
 
-		self._worker = threading.Thread(target=self._work)
+		self._worker = multiprocessing.Process(target=self._work)
 		self._worker.daemon = True
 		self._worker.start()
 
@@ -392,7 +392,7 @@ class CommandTrigger(GenericEventListener):
 			except:
 				self._logger.exception("Command failed")
 
-		t = threading.Thread(target=process)
+		t = multiprocessing.Process(target=process)
 		t.daemon = True
 		t.start()
 

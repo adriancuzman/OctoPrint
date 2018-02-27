@@ -12,7 +12,7 @@ try:
 except ImportError:
 	import Queue as queue
 import os
-import threading
+import multiprocessing
 import collections
 import time
 
@@ -137,10 +137,10 @@ class AbstractAnalysisQueue(object):
 
 		self._finished_callback = finished_callback
 
-		self._active = threading.Event()
+		self._active = multiprocessing.Event()
 		self._active.set()
 
-		self._done = threading.Event()
+		self._done = multiprocessing.Event()
 		self._done.clear()
 
 		self._currentFile = None
@@ -150,7 +150,7 @@ class AbstractAnalysisQueue(object):
 		self._current = None
 		self._current_highprio = False
 
-		self._worker = threading.Thread(target=self._work)
+		self._worker = multiprocessing.Process(target=self._work)
 		self._worker.daemon = True
 		self._worker.start()
 

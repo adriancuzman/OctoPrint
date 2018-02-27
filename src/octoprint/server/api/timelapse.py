@@ -6,7 +6,7 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 __copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
 
 import os
-import threading
+import multiprocessing
 import logging
 
 from flask import request, jsonify, url_for, make_response
@@ -30,7 +30,7 @@ _timelapse_cache_finished = []
 _timelapse_cache_finished_lastmodified = None
 _timelapse_cache_unrendered = []
 _timelapse_cache_unrendered_lastmodified = None
-_timelapse_cache_mutex = threading.RLock()
+_timelapse_cache_mutex = multiprocessing.RLock()
 
 def _config_for_timelapse(timelapse):
 	if timelapse is not None and isinstance(timelapse, octoprint.timelapse.ZTimelapse):

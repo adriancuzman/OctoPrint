@@ -10,7 +10,7 @@ import sarge
 import sys
 import logging
 import site
-import threading
+import multiprocessing
 
 import pkg_resources
 
@@ -18,7 +18,7 @@ from .commandline import CommandlineCaller, clean_ansi
 from octoprint.util import to_unicode
 
 _cache = dict(version=dict(), setup=dict())
-_cache_mutex = threading.RLock()
+_cache_mutex = multiprocessing.RLock()
 
 class UnknownPip(Exception):
 	pass

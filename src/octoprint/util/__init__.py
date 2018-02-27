@@ -16,7 +16,7 @@ import re
 import tempfile
 import logging
 import shutil
-import threading
+import multiprocessing
 from functools import wraps
 import warnings
 import contextlib
@@ -1004,10 +1004,10 @@ def utmify(link, source=None, medium=None, name=None, term=None, content=None):
 	return urlparse.urlunparse(parts)
 
 
-class RepeatedTimer(threading.Thread):
+class RepeatedTimer(multiprocessing.Process):
 	"""
 	This class represents an action that should be run repeatedly in an interval. It is similar to python's
-	own :class:`threading.Timer` class, but instead of only running once the ``function`` will be run again and again,
+	own :class:`multiprocessing.Timer` class, but instead of only running once the ``function`` will be run again and again,
 	sleeping the stated ``interval`` in between.
 
 	RepeatedTimers are started, as with threads, by calling their ``start()`` method. The timer can be stopped (in
@@ -1073,7 +1073,7 @@ class RepeatedTimer(threading.Thread):
 	def __init__(self, interval, function, args=None, kwargs=None,
 	             run_first=False, condition=None, on_condition_false=None,
 	             on_cancelled=None, on_finish=None, daemon=True):
-		threading.Thread.__init__(self)
+		multiprocessing.Process.__init__(self)
 
 		if args is None:
 			args = []
@@ -1088,7 +1088,7 @@ class RepeatedTimer(threading.Thread):
 			self.interval = interval
 
 		self.function = function
-		self.finished = threading.Event()
+		self.finished = multiprocessing.Event()
 		self.args = args
 		self.kwargs = kwargs
 		self.run_first = run_first
@@ -1142,8 +1142,8 @@ class CountedEvent(object):
 	def __init__(self, value=0, maximum=None, **kwargs):
 		self._counter = 0
 		self._max = kwargs.get("max", maximum)
-		self._mutex = threading.Lock()
-		self._event = threading.Event()
+		self._mutex = multiprocessing.Lock()
+		self._event = multiprocessing.Event()
 
 		self._internal_set(value)
 
@@ -1179,7 +1179,7 @@ class CountedEvent(object):
 class InvariantContainer(object):
 	def __init__(self, initial_data=None, guarantee_invariant=None):
 		from collections import Iterable
-		from threading import RLock
+		from multiprocessing import RLock
 
 		if guarantee_invariant is None:
 			guarantee_invariant = lambda data: data
@@ -1318,7 +1318,7 @@ class ConnectivityChecker(object):
 		self._online = not self._enabled
 
 		self._check_worker = None
-		self._check_mutex = threading.RLock()
+		self._check_mutex = multiprocessing.RLock()
 
 		self._run()
 

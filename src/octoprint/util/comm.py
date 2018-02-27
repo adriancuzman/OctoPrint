@@ -9,7 +9,7 @@ import os
 import glob
 import time
 import re
-import threading
+import multiprocessing
 
 try:
 	import queue
@@ -386,7 +386,7 @@ class MachineCom(object):
 		self._sdRelativePath = settings().getBoolean(["feature", "sdRelativePath"])
 		self._blockWhileDwelling = settings().getBoolean(["feature", "blockWhileDwelling"])
 		self._currentLine = 1
-		self._line_mutex = threading.RLock()
+		self._line_mutex = multiprocessing.RLock()
 		self._resendDelta = None
 
 		self._use_xonxoff_workaround = settings().get(["serial", "useSoftwareFlowWorkaround"])
@@ -485,18 +485,18 @@ class MachineCom(object):
 		self._currentFile = None
 
 		# multithreading locks
-		self._jobLock = threading.RLock()
-		self._sendingLock = threading.RLock()
+		self._jobLock = multiprocessing.RLock()
+		self._sendingLock = multiprocessing.RLock()
 
 		# monitoring thread
 		self._monitoring_active = True
-		self.monitoring_thread = threading.Thread(target=self._monitor, name="comm._monitor")
+		self.monitoring_thread = multiprocessing.Process(target=self._monitor, name="comm._monitor")
 		self.monitoring_thread.daemon = True
 		self.monitoring_thread.start()
 
 		# sending thread
 		self._send_queue_active = True
-		self.sending_thread = threading.Thread(target=self._send_loop, name="comm.sending_thread")
+		self.sending_thread = multiprocessing.Process(target=self._send_loop, name="comm.sending_thread")
 		self.sending_thread.daemon = True
 		self.sending_thread.start()
 
@@ -2971,7 +2971,7 @@ class PrintingGcodeFileInformation(PrintingFileInformation):
 		PrintingFileInformation.__init__(self, filename)
 
 		self._handle = None
-		self._handle_mutex = threading.RLock()
+		self._handle_mutex = multiprocessing.RLock()
 
 		self._offsets_callback = offsets_callback
 		self._current_tool_callback = current_tool_callback
@@ -3722,7 +3722,7 @@ def upload_cli():
 		progress_interval = 1
 
 		def __init__(self, path, target):
-			self.finished = threading.Event()
+			self.finished = multiprocessing.Event()
 			self.finished.clear()
 
 			self.comm = None

@@ -5,7 +5,7 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 
 import logging
 import os
-import threading
+import multiprocessing
 import time
 import fnmatch
 import datetime
@@ -55,10 +55,10 @@ _valid_timelapse_types = ["off", "timed", "zchange"]
 _update_callbacks = []
 
 # lock for timelapse cleanup, must be re-entrant
-_cleanup_lock = threading.RLock()
+_cleanup_lock = multiprocessing.RLock()
 
 # lock for timelapse job
-_job_lock = threading.RLock()
+_job_lock = multiprocessing.RLock()
 
 
 def _extract_prefix(filename):
@@ -370,11 +370,11 @@ class Timelapse(object):
 
 		self._fps = fps
 
-		self._capture_mutex = threading.Lock()
+		self._capture_mutex = multiprocessing.Lock()
 		self._capture_queue = queue.Queue()
 		self._capture_queue_active = True
 
-		self._capture_queue_thread = threading.Thread(target=self._capture_queue_worker)
+		self._capture_queue_thread = multiprocessing.Process(target=self._capture_queue_worker)
 		self._capture_queue_thread.daemon = True
 		self._capture_queue_thread.start()
 
@@ -764,7 +764,7 @@ class TimedTimelapse(Timelapse):
 
 class TimelapseRenderJob(object):
 
-	render_job_lock = threading.RLock()
+	render_job_lock = multiprocessing.RLock()
 
 	def __init__(self, capture_dir, output_dir, prefix, postfix=None, capture_glob="{prefix}-*.jpg",
 	             capture_format="{prefix}-%d.jpg", output_format="{prefix}{postfix}.mpg", fps=25, threads=1,
@@ -789,7 +789,7 @@ class TimelapseRenderJob(object):
 	def process(self):
 		"""Processes the job."""
 
-		self._thread = threading.Thread(target=self._render,
+		self._thread = multiprocessing.Process(target=self._render,
 		                                name="TimelapseRenderJob_{prefix}_{postfix}".format(prefix=self._prefix,
 		                                                                                    postfix=self._postfix))
 		self._thread.daemon = True

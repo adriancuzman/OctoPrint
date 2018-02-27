@@ -201,9 +201,9 @@ class FileManager(object):
 		self._slicing_manager = slicing_manager
 		self._printer_profile_manager = printer_profile_manager
 
-		import threading
+		import multiprocessing
 		self._slicing_jobs = dict()
-		self._slicing_jobs_mutex = threading.Lock()
+		self._slicing_jobs_mutex = multiprocessing.Lock()
 
 		self._slicing_progress_callbacks = []
 		self._last_slicing_progress = None
@@ -225,8 +225,8 @@ class FileManager(object):
 			for storage_type, storage_manager in self._storage_managers.items():
 				self._determine_analysis_backlog(storage_type, storage_manager)
 
-		import threading
-		thread = threading.Thread(target=worker)
+		import multiprocessing
+		thread = multiprocessing.Process(target=worker)
 		thread.daemon = True
 		thread.start()
 
@@ -426,8 +426,8 @@ class FileManager(object):
 						except:
 							self._logger.exception("Exception while sending slicing progress to plugin %s" % plugin._identifier)
 
-				import threading
-				thread = threading.Thread(target=call_plugins, args=(slicer, source_location, source_path, dest_location, dest_path, progress_int))
+				import multiprocessing
+				thread = multiprocessing.Process(target=call_plugins, args=(slicer, source_location, source_path, dest_location, dest_path, progress_int))
 				thread.daemon = False
 				thread.start()
 

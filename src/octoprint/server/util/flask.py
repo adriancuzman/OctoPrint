@@ -17,7 +17,7 @@ import functools
 import contextlib
 import time
 import uuid
-import threading
+import multiprocessing
 import logging
 import netaddr
 import os
@@ -534,7 +534,7 @@ class LessSimpleCache(BaseCache):
 
 	def __init__(self, threshold=500, default_timeout=300):
 		BaseCache.__init__(self, default_timeout=default_timeout)
-		self._mutex = threading.RLock()
+		self._mutex = multiprocessing.RLock()
 		self._cache = {}
 		self._bypassed = set()
 		self.clear = self._cache.clear
@@ -717,7 +717,7 @@ class PreemptiveCache(object):
 
 		self._logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
 
-		self._lock = threading.RLock()
+		self._lock = multiprocessing.RLock()
 
 	def record(self, data, unless=None, root=None):
 		if callable(unless) and unless():
@@ -1141,7 +1141,7 @@ class AppSessionManager(object):
 	def __init__(self):
 		self._sessions = dict()
 		self._oldest = None
-		self._mutex = threading.RLock()
+		self._mutex = multiprocessing.RLock()
 
 		self._logger = logging.getLogger(__name__)
 

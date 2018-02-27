@@ -316,8 +316,8 @@ class SlicingManager(object):
 			finally:
 				callback(*callback_args, **callback_kwargs)
 
-		import threading
-		slicer_worker_thread = threading.Thread(target=slicer_worker,
+		import multiprocessing
+		slicer_worker_thread = multiprocessing.Process(target=slicer_worker,
 		                                        args=(slicer, source_path, dest_path, profile_name, overrides, printer_profile, position, callback, callback_args, callback_kwargs))
 		slicer_worker_thread.daemon = True
 		slicer_worker_thread.start()
@@ -377,9 +377,9 @@ class SlicingManager(object):
 
 		If it's a :class:`dict`, a new :class:`SlicingProfile` instance will be created with the supplied meta data and
 		the profile data as the :attr:`~SlicingProfile.data` attribute.
-		
+
 		.. note::
-		
+
 		   If the profile is the first profile to be saved for the slicer, it will automatically be marked as default.
 
 		Arguments:
@@ -432,7 +432,7 @@ class SlicingManager(object):
 		               profile=name)
 		event = octoprint.events.Events.SLICING_PROFILE_MODIFIED if is_overwrite else octoprint.events.Events.SLICING_PROFILE_ADDED
 		octoprint.events.eventManager().fire(event, payload)
-		
+
 		if first_profile:
 			# enforce the first profile we add for this slicer  is set as default
 			self.set_default_profile(slicer, name)

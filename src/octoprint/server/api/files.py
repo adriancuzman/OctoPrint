@@ -21,13 +21,13 @@ import octoprint.slicing
 import psutil
 import hashlib
 import logging
-import threading
+import multiprocessing
 
 
 #~~ GCODE file handling
 
 _file_cache = dict()
-_file_cache_mutex = threading.RLock()
+_file_cache_mutex = multiprocessing.RLock()
 
 _DATA_FORMAT_VERSION = "v2"
 

@@ -69,8 +69,8 @@ class SocketClient(object):
 		self._ws = websocket.WebSocketApp(self._url, **kwargs)
 
 		# initialize thread
-		import threading
-		self._thread = threading.Thread(target=self._on_thread_run)
+		import multiprocessing
+		self._thread = multiprocessing.Process(target=self._on_thread_run)
 		self._thread.daemon = self._daemon
 
 	def _on_thread_run(self):

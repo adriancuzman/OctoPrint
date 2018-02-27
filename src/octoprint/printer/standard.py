@@ -12,7 +12,7 @@ __copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms
 import copy
 import logging
 import os
-import threading
+import multiprocessing
 import time
 
 from past.builtins import basestring
@@ -69,11 +69,11 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 		# sd handling
 		self._sdPrinting = False
 		self._sdStreaming = False
-		self._sdFilelistAvailable = threading.Event()
+		self._sdFilelistAvailable = multiprocessing.Event()
 		self._streamingFinishedCallback = None
 		self._streamingFailedCallback = None
 
-		self._selectedFileMutex = threading.RLock()
+		self._selectedFileMutex = multiprocessing.RLock()
 		self._selectedFile = None
 		self._timeEstimationData = None
 		self._timeEstimationStatsWeighingUntil = settings().getFloat(["estimation", "printTime", "statsWeighingUntil"])
@@ -190,7 +190,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 				except:
 					self._logger.exception("Exception while sending print progress to plugin %s" % plugin._identifier)
 
-		thread = threading.Thread(target=call_plugins, args=(storage, filename, progress))
+		thread = multiprocessing.Process(target=call_plugins, args=(storage, filename, progress))
 		thread.daemon = False
 		thread.start()
 
@@ -1029,7 +1029,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 							                            False,
 							                            self._printerProfileManager.get_current_or_default()["id"])
 
-						thread = threading.Thread(target=log_print)
+						thread = multiprocessing.Process(target=log_print)
 						thread.daemon = True
 						thread.start()
 			self._analysisQueue.resume() # printing done, put those cpu cycles to good use
@@ -1132,7 +1132,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 				                            True,
 				                            self._printerProfileManager.get_current_or_default()["id"])
 
-			thread = threading.Thread(target=log_print)
+			thread = multiprocessing.Process(target=log_print)
 			thread.daemon = True
 			thread.start()
 
@@ -1167,7 +1167,7 @@ class Printer(PrinterInterface, comm.MachineComPrintCallback):
 				                            self._printerProfileManager.get_current_or_default()["id"])
 				eventManager().fire(Events.PRINT_FAILED, payload)
 
-			thread = threading.Thread(target=finalize)
+			thread = multiprocessing.Process(target=finalize)
 			thread.daemon = True
 			thread.start()
 
@@ -1284,12 +1284,12 @@ class StateMonitor(object):
 
 		self._progress_dirty = False
 
-		self._change_event = threading.Event()
-		self._state_lock = threading.Lock()
-		self._progress_lock = threading.Lock()
+		self._change_event = multiprocessing.Event()
+		self._state_lock = multiprocessing.Lock()
+		self._progress_lock = multiprocessing.Lock()
 
 		self._last_update = time.time()
-		self._worker = threading.Thread(target=self._work)
+		self._worker = multiprocessing.Process(target=self._work)
 		self._worker.daemon = True
 		self._worker.start()
 

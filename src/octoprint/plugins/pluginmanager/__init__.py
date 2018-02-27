@@ -29,7 +29,7 @@ import os
 import copy
 import dateutil.parser
 import time
-import threading
+import multiprocessing
 
 _DATA_FORMAT_VERSION = "v2"
 
@@ -706,7 +706,7 @@ class PluginManagerPlugin(octoprint.plugin.SimpleApiPlugin,
 			self._notices_available = self._fetch_notices_from_disk()
 
 		if async:
-			thread = threading.Thread(target=run)
+			thread = multiprocessing.Process(target=run)
 			thread.daemon = True
 			thread.start()
 		else:

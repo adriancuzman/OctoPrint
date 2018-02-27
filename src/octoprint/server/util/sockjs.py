@@ -6,7 +6,7 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 __copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms of the AGPLv3 License"
 
 import logging
-import threading
+import multiprocessing
 import sockjs.tornado
 import sockjs.tornado.session
 import time
@@ -29,7 +29,7 @@ class ThreadSafeSession(sockjs.tornado.session.Session):
 	def set_handler(self, handler, start_heartbeat=True):
 		if getattr(handler, "__orig_send_pack", None) is None:
 			orig_send_pack = handler.send_pack
-			mutex = threading.RLock()
+			mutex = multiprocessing.RLock()
 
 			def send_pack(*args, **kwargs):
 				with mutex:
@@ -57,11 +57,11 @@ class PrinterStateConnection(sockjs.tornado.SockJSConnection, octoprint.printer.
 		self._logger = logging.getLogger(__name__)
 
 		self._temperatureBacklog = []
-		self._temperatureBacklogMutex = threading.Lock()
+		self._temperatureBacklogMutex = multiprocessing.Lock()
 		self._logBacklog = []
-		self._logBacklogMutex = threading.Lock()
+		self._logBacklogMutex = multiprocessing.Lock()
 		self._messageBacklog = []
-		self._messageBacklogMutex = threading.Lock()
+		self._messageBacklogMutex = multiprocessing.Lock()
 
 		self._printer = printer
 		self._fileManager = fileManager

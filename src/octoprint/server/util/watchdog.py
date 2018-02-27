@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms
 import logging
 import os
 import time
-import threading
+import multiprocessing
 import watchdog.events
 
 import octoprint.filemanager
@@ -71,7 +71,7 @@ class GcodeWatchdogHandler(watchdog.events.PatternMatchingEventHandler):
 			self._logger.exception("There was an error while processing the file {} in the watched folder".format(path))
 
 	def on_created(self, event):
-		thread = threading.Thread(target=self._repeatedly_check, args=(event.src_path,))
+		thread = multiprocessing.Process(target=self._repeatedly_check, args=(event.src_path,))
 		thread.daemon = True
 		thread.start()
 

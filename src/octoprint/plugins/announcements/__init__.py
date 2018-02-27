@@ -13,7 +13,7 @@ import codecs
 import os
 import re
 import time
-import threading
+import multiprocessing
 
 import feedparser
 import flask
@@ -36,7 +36,7 @@ class AnnouncementPlugin(octoprint.plugin.AssetPlugin,
 	# noinspection PyMissingConstructor
 	def __init__(self):
 		self._cached_channel_configs = None
-		self._cached_channel_configs_mutex = threading.RLock()
+		self._cached_channel_configs_mutex = multiprocessing.RLock()
 
 		from slugify import Slugify
 		self._slugify = Slugify()
@@ -49,7 +49,7 @@ class AnnouncementPlugin(octoprint.plugin.AssetPlugin,
 		def fetch_data():
 			self._fetch_all_channels()
 
-		thread = threading.Thread(target=fetch_data)
+		thread = multiprocessing.Process(target=fetch_data)
 		thread.daemon = True
 		thread.start()
 
@@ -281,7 +281,7 @@ class AnnouncementPlugin(octoprint.plugin.AssetPlugin,
 		return self._get_channel_configs(force=force).get(safe_key)
 
 	def _fetch_all_channels_async(self, force=False):
-		thread = threading.Thread(target=self._fetch_all_channels, kwargs=dict(force=force))
+		thread = multiprocessing.Process(target=self._fetch_all_channels, kwargs=dict(force=force))
 		thread.daemon = True
 		thread.start()
 

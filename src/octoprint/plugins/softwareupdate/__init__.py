@@ -10,7 +10,7 @@ import octoprint.plugin
 
 import flask
 import os
-import threading
+import multiprocessing
 import time
 import logging
 import logging.handlers
@@ -47,13 +47,13 @@ class SoftwareUpdatePlugin(octoprint.plugin.BlueprintPlugin,
 	# noinspection PyMissingConstructor
 	def __init__(self):
 		self._update_in_progress = False
-		self._configured_checks_mutex = threading.Lock()
+		self._configured_checks_mutex = multiprocessing.Lock()
 		self._configured_checks = None
 		self._refresh_configured_checks = False
 
-		self._get_versions_mutex = threading.RLock()
+		self._get_versions_mutex = multiprocessing.RLock()
 		self._get_versions_data = None
-		self._get_versions_data_ready = threading.Event()
+		self._get_versions_data_ready = multiprocessing.Event()
 
 		self._version_cache = dict()
 		self._version_cache_ttl = 0
@@ -92,7 +92,7 @@ class SoftwareUpdatePlugin(octoprint.plugin.BlueprintPlugin,
 		def fetch_data():
 			self.get_current_versions()
 
-		thread = threading.Thread(target=fetch_data)
+		thread = multiprocessing.Process(target=fetch_data)
 		thread.daemon = True
 		thread.start()
 
@@ -584,7 +584,7 @@ class SoftwareUpdatePlugin(octoprint.plugin.BlueprintPlugin,
 		if event != Events.CONNECTIVITY_CHANGED or not payload or not payload.get("new", False):
 			return
 
-		thread = threading.Thread(target=self.get_current_versions)
+		thread = multiprocessing.Process(target=self.get_current_versions)
 		thread.daemon = True
 		thread.start()
 
@@ -795,7 +795,7 @@ class SoftwareUpdatePlugin(octoprint.plugin.BlueprintPlugin,
 			tmp = ["octoprint"] + to_be_updated
 			to_be_updated = tmp
 
-		updater_thread = threading.Thread(target=self._update_worker, args=(populated_checks, to_be_updated, force))
+		updater_thread = multiprocessing.Process(target=self._update_worker, args=(populated_checks, to_be_updated, force))
 		updater_thread.daemon = False
 		updater_thread.start()
 
