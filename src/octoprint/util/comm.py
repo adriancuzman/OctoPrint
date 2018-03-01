@@ -378,7 +378,7 @@ class MachineCom(object):
 
 		self._hello_command = settings().get(["serial", "helloCommand"])
 
-		self._alwaysSendChecksum = settings().getBoolean(["feature", "alwaysSendChecksum"])
+		self._alwaysSendChecksum = True #settings().getBoolean(["feature", "alwaysSendChecksum"])
 		self._neverSendChecksum = settings().getBoolean(["feature", "neverSendChecksum"])
 		self._sendChecksumWithUnknownCommands = settings().getBoolean(["feature", "sendChecksumWithUnknownCommands"])
 		self._unknownCommandsNeedAck = settings().getBoolean(["feature", "unknownCommandsNeedAck"])
@@ -466,6 +466,8 @@ class MachineCom(object):
 		self._sdFileToSelect = None
 		self._ignore_select = False
 		self._manualStreaming = False
+		self._writingFileToSD = False
+		self._waiting_for_M28_ok = False
 
 		self.last_temperature = TemperatureRecord()
 		self.pause_temperature = TemperatureRecord()
@@ -600,9 +602,8 @@ class MachineCom(object):
 
 	def isSendingFileToSDWithSoftwareFlow(self):
 		#first determine if sending file to sd and printer supports xon_xoff
-		if 	self._state == self.STATE_PRINTING and self.isStreaming() and \
-			self._firmware_capabilities.get(self.CAPABILITY_SERIAL_XON_XOFF, False) and \
-			self._currentLine > 1:
+		if 	self._writingFileToSD and \
+			self._firmware_capabilities.get(self.CAPABILITY_SERIAL_XON_XOFF, False):
 				# currentLine > 1 is to enable flow control only and ignore ok only after the first ok is sent
 				# if not handle_ok will not set clear_to_send and in send_loop it will wait forever
 				if self._serial != None and getattr(self._serial, "xonxoff", False):
@@ -921,7 +922,6 @@ class MachineCom(object):
 			else:
 				self._currentFile = StreamingGcodeFileInformation(filename, localFilename, remoteFilename)
 			self._currentFile.start()
-
 			self.sendCommand("M28 %s" % remoteFilename)
 			self._pause_transmission = False
 			eventManager().fire(Events.TRANSFER_STARTED, {"local": localFilename, "remote": remoteFilename})
@@ -1642,6 +1642,10 @@ class MachineCom(object):
 
 	def _handle_ok(self):
 		can_send = not self.isSendingFileToSDWithSoftwareFlow()
+		if self._waiting_for_M28_ok:
+			self._writingFileToSD = True
+			self._waiting_for_M28_ok = False
+			can_send = True
 		if can_send:
 			self._clear_to_send.set()
 
@@ -2664,11 +2668,13 @@ class MachineCom(object):
 			self.setPause(True)
 
 	def _gcode_M28_sent(self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs):
+		self._waiting_for_M28_ok = True
 		if not self.isStreaming():
 			self._log("Detected manual streaming. Disabling temperature polling. Finish writing with M29. Do NOT attempt to print while manually streaming!")
 			self._manualStreaming = True
 
 	def _gcode_M29_sent(self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs):
+		self._writingFileToSD = False
 		if self._manualStreaming:
 			self._log("Manual streaming done. Re-enabling temperature polling. All is well.")
 			self._manualStreaming = False
