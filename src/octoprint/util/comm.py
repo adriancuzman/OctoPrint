@@ -1237,7 +1237,7 @@ class MachineCom(object):
 			try:
 				line = self._readline()
 				if line is None:
-					break
+					continue
 				if line.strip() is not "":
 					self._consecutive_timeouts = 0
 					self._timeout = get_new_timeout("communication", self._timeout_intervals)
@@ -2072,9 +2072,12 @@ class MachineCom(object):
 		if self._serial is None:
 			return None
 		try:
-			ret = self._serial.readline()
-			if self.isSendingFileToSDWithSoftwareFlow() and self._use_xonxoff_workaround:
-				ret = self._filterXonXoffCharacters(ret)
+			if self._serial. in_waiting > 2:
+				ret = self._serial.readline()
+				if self.isSendingFileToSDWithSoftwareFlow() and self._use_xonxoff_workaround:
+					ret = self._filterXonXoffCharacters(ret)
+			else:
+				return None
 		except Exception as ex:
 			if not self._connection_closing:
 				self._logger.exception("Unexpected error while reading from serial port")
