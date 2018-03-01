@@ -466,7 +466,6 @@ class MachineCom(object):
 		self._sdFileToSelect = None
 		self._ignore_select = False
 		self._manualStreaming = False
-		self._writingFileToSD = False
 		self._waiting_for_M28_ok = False
 
 		self.last_temperature = TemperatureRecord()
@@ -602,7 +601,7 @@ class MachineCom(object):
 
 	def isSendingFileToSDWithSoftwareFlow(self):
 		#first determine if sending file to sd and printer supports xon_xoff
-		if 	self._writingFileToSD and \
+		if 	 self._state == self.STATE_PRINTING and self.isStreaming() and \
 			self._firmware_capabilities.get(self.CAPABILITY_SERIAL_XON_XOFF, False):
 				# currentLine > 1 is to enable flow control only and ignore ok only after the first ok is sent
 				# if not handle_ok will not set clear_to_send and in send_loop it will wait forever
@@ -1643,7 +1642,6 @@ class MachineCom(object):
 	def _handle_ok(self):
 		can_send = not self.isSendingFileToSDWithSoftwareFlow()
 		if self._waiting_for_M28_ok:
-			self._writingFileToSD = True
 			self._waiting_for_M28_ok = False
 			can_send = True
 		if can_send:
@@ -2674,7 +2672,6 @@ class MachineCom(object):
 			self._manualStreaming = True
 
 	def _gcode_M29_sent(self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs):
-		self._writingFileToSD = False
 		if self._manualStreaming:
 			self._log("Manual streaming done. Re-enabling temperature polling. All is well.")
 			self._manualStreaming = False
