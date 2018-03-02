@@ -1967,6 +1967,8 @@ class MachineCom(object):
 			serial_obj.parity = serial.PARITY_NONE
 			serial_obj.open()
 
+			self._log("PySerial version: "+serial.VERSION)
+
 			return serial_obj
 
 		serial_factories = self._serial_factory_hooks.items() + [("default", default)]
