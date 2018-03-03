@@ -916,7 +916,7 @@ class MachineCom(object):
 			return
 
 		with self._jobLock:
-			#self.resetLineNumbers()
+			self.resetLineNumbers()
 
 			if special:
 				self._currentFile = SpecialStreamingGcodeFileInformation(filename, localFilename, remoteFilename)
