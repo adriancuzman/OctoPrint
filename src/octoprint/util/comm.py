@@ -2079,8 +2079,7 @@ class MachineCom(object):
 
 		try:
 			ret = self._serial.readline()
-			if self.isSendingFileToSDWithSoftwareFlow() and self._use_xonxoff_workaround:
-				ret = self._filterXonXoffCharacters(ret)
+			ret = self._filterXonXoffCharacters(ret)
 		except Exception as ex:
 			if not self._connection_closing:
 				self._logger.exception("Unexpected error while reading from serial port")
