@@ -22,10 +22,8 @@ import warnings
 import contextlib
 import collections
 
-try:
-	import queue
-except ImportError:
-	import Queue as queue
+import multiprocessing
+import multiprocessing.queues
 
 from past.builtins import basestring
 
@@ -1209,10 +1207,10 @@ class InvariantContainer(object):
 		return self._data.__iter__()
 
 
-class PrependableQueue(queue.Queue):
+class PrependableQueue(multiprocessing.queues.JoinableQueue):
 
 	def __init__(self, maxsize=0):
-		queue.Queue.__init__(self, maxsize=maxsize)
+		multiprocessing.queues.JoinableQueue.__init__(self, maxsize=maxsize)
 
 	def prepend(self, item, block=True, timeout=True):
 		from time import time as _time

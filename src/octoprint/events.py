@@ -8,15 +8,13 @@ __copyright__ = "Copyright (C) 2014 The OctoPrint Project - Released under terms
 import datetime
 import logging
 import subprocess
-try:
-	import queue
-except ImportError:
-	import Queue as queue
-import threading
+import multiprocessing
+import multiprocessing.queues as queue
 import collections
 
 from octoprint.settings import settings
 import octoprint.plugin
+import multiprocessing
 
 # singleton
 _instance = None
@@ -137,10 +135,10 @@ class EventManager(object):
 		self._startup_signaled = False
 		self._shutdown_signaled = False
 
-		self._queue = queue.Queue()
-		self._held_back = queue.Queue()
+		self._queue = multiprocessing.Queue()
+		self._held_back = multiprocessing.Queue()
 
-		self._worker = threading.Thread(target=self._work)
+		self._worker = multiprocessing.Process(target=self._work)
 		self._worker.daemon = True
 		self._worker.start()
 
@@ -392,7 +390,7 @@ class CommandTrigger(GenericEventListener):
 			except:
 				self._logger.exception("Command failed")
 
-		t = threading.Thread(target=process)
+		t = multiprocessing.Process(target=process)
 		t.daemon = True
 		t.start()
 
