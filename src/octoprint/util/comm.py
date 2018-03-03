@@ -2357,6 +2357,8 @@ class MachineCom(object):
 
 		while self._send_queue_active:
 			try:
+				if self._pause_transmission:
+					continue
 				# wait until we have something in the queue
 				entry = self._send_queue.get()
 
