@@ -394,6 +394,7 @@ class MachineCom(object):
 		self._xonxoff_resumeChar = chr(17)
 		self._waitingForM28Confirmation = False
 		self._startedSendingFileToSD = False
+		self._startSDTime = 0
 
 		maxLinesHistory = settings().getInt(["serial", "maxLinesHistory"])
 		if maxLinesHistory is None:
@@ -2670,12 +2671,18 @@ class MachineCom(object):
 
 	def _gcode_M28_sent(self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs):
 		self._waitingForM28Confirmation = True
+		self._startSDTime = time.time()
 		if not self.isStreaming():
 			self._log("Detected manual streaming. Disabling temperature polling. Finish writing with M29. Do NOT attempt to print while manually streaming!")
 			self._manualStreaming = True
 
 	def _gcode_M29_sent(self, cmd, cmd_type=None, gcode=None, subcode=None, *args, **kwargs):
 		self._startedSendingFileToSD = False
+
+		writeToSDTime = time.time() - self._startSDTime
+
+		self._log("Closing file.")
+		self._log("Time: "+str(writeToSDTime))
 		if self._manualStreaming:
 			self._log("Manual streaming done. Re-enabling temperature polling. All is well.")
 			self._manualStreaming = False
